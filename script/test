@@ -1,23 +1,15 @@
 #! /bin/bash
-#
+set -e
+
 # Usage:
 #   script/test
 #   script/test <test_file>
 
-if [ ! -d tmp ]; then
-  mkdir tmp
+if [ -d test/dest ]
+  then rm -r test/dest
 fi
 
-if [ -d test/dest ]; then
-  rm -r test/dest
+if [[ $# -lt 1 ]]
+ then time bundle exec rake TESTOPTS='--profile' test 
+ else time bundle exec ruby -Itest "$@" --profile
 fi
-
-if [ -z "$1" ]; then
-  TEST_FILES=$(ruby -e "puts Dir.glob('test/test_*.rb')")
-else
-  TEST_FILES="$@"
-fi
-
-set -x
-
-time bundle exec ruby -Ilib -Itest -rloader $TEST_FILES --profile

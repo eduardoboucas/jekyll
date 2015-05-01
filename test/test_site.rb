@@ -190,7 +190,7 @@ class TestSite < JekyllUnitTest
     end
 
     should "read posts" do
-      @site.read_posts('')
+      @site.posts.concat(PostReader.new(@site).read(''))
       posts = Dir[source_dir('_posts', '**', '*')]
       posts.delete_if { |post| File.directory?(post) && !Post.valid?(post) }
       assert_equal posts.size - @num_invalid_posts, @site.posts.size
@@ -370,7 +370,7 @@ class TestSite < JekyllUnitTest
         site = Site.new(site_configuration)
         site.process
 
-        file_content = site.read_data_file(source_dir('_data', 'members.yaml'))
+        file_content = DataReader.new(site).read_data_file(source_dir('_data', 'members.yaml'))
 
         assert_equal site.data['members'], file_content
         assert_equal site.site_payload['site']['data']['members'], file_content
@@ -457,6 +457,63 @@ class TestSite < JekyllUnitTest
           assert_equal "production", @page.content.strip
         end
       end
+    end
+
+    context "incremental build" do
+      setup do
+        @site = Site.new(site_configuration({
+          'full_rebuild' => false
+        }))
+        @site.read
+      end
+
+      should "build incrementally" do
+        contacts_html = @site.pages.find { |p| p.name == "contacts.html" }
+        @site.process
+
+        source = @site.in_source_dir(contacts_html.path)
+        dest = File.expand_path(contacts_html.destination(@site.dest))
+        mtime1 = File.stat(dest).mtime.to_i # first run must generate dest file
+
+        # need to sleep because filesystem timestamps have best resolution in seconds
+        sleep 1
+        @site.process
+        mtime2 = File.stat(dest).mtime.to_i
+        assert_equal mtime1, mtime2 # no modifications, so remain the same
+
+        # simulate file modification by user
+        FileUtils.touch source
+
+        sleep 1
+        @site.process
+        mtime3 = File.stat(dest).mtime.to_i
+        refute_equal mtime2, mtime3 # must be regenerated 
+
+        sleep 1
+        @site.process
+        mtime4 = File.stat(dest).mtime.to_i
+        assert_equal mtime3, mtime4 # no modifications, so remain the same
+      end
+
+      should "regnerate files that have had their destination deleted" do
+        contacts_html = @site.pages.find { |p| p.name == "contacts.html" }
+        @site.process
+
+        source = @site.in_source_dir(contacts_html.path)
+        dest = File.expand_path(contacts_html.destination(@site.dest))
+        mtime1 = File.stat(dest).mtime.to_i # first run must generate dest file
+
+        # simulate file modification by user
+        File.unlink dest
+        refute File.file?(dest)
+
+        sleep 1 # sleep for 1 second, since mtimes have 1s resolution
+        @site.process
+        assert File.file?(dest)
+        mtime2 = File.stat(dest).mtime.to_i
+        refute_equal mtime1, mtime2 # must be regenerated 
+      end
+
     end
 
   end

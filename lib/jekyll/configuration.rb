@@ -45,25 +45,14 @@ module Jekyll
       'host'          => '127.0.0.1',
       'baseurl'       => '',
 
-      # Backwards-compatibility options
-      'relative_permalinks' => false,
-
       # Output Configuration
       'permalink'     => 'date',
       'paginate_path' => '/page:num',
       'timezone'      => nil,           # use the local timezone
 
       'quiet'         => false,
+      'verbose'       => false,
       'defaults'      => [],
-
-      'maruku' => {
-        'use_tex'    => false,
-        'use_divs'   => false,
-        'png_engine' => 'blahtex',
-        'png_dir'    => 'images/latex',
-        'png_url'    => '/images/latex',
-        'fenced_code_blocks' => true
-      },
 
       'rdiscount' => {
         'extensions' => []
@@ -99,18 +88,28 @@ module Jekyll
       reduce({}) { |hsh,(k,v)| hsh.merge(k.to_s => v) }
     end
 
+    def get_config_value_with_override(config_key, override)
+      override[config_key] || self[config_key] || DEFAULTS[config_key]
+    end
+
     # Public: Directory of the Jekyll source folder
     #
     # override - the command-line options hash
     #
     # Returns the path to the Jekyll source directory
     def source(override)
-      override['source'] || self['source'] || DEFAULTS['source']
+      get_config_value_with_override('source', override)
     end
 
-    def quiet?(override = {})
-      override['quiet'] || self['quiet'] || DEFAULTS['quiet']
+    def quiet(override = {})
+      get_config_value_with_override('quiet', override)
     end
+    alias_method :quiet?, :quiet
+
+    def verbose(override = {})
+      get_config_value_with_override('verbose', override)
+    end
+    alias_method :verbose?, :verbose
 
     def safe_load_file(filename)
       case File.extname(filename)
@@ -130,8 +129,8 @@ module Jekyll
     #
     # Returns an Array of config files
     def config_files(override)
-      # Be quiet quickly.
-      Jekyll.logger.log_level = :error if quiet?(override)
+      # Adjust verbosity quickly
+      Jekyll.logger.adjust_verbosity(:quiet => quiet?(override), :verbose => verbose?(override))
 
       # Get configuration from <source>/_config.yml or <source>/<config_file>
       config_files = override.delete('config')
@@ -257,16 +256,13 @@ module Jekyll
       end
 
       if config.fetch('markdown', 'kramdown').to_s.downcase.eql?("maruku")
-        Jekyll::Deprecator.deprecation_message "You're using the 'maruku' " +
-          "Markdown processor. Maruku support has been deprecated and will " +
-          "be removed in 3.0.0. We recommend you switch to Kramdown."
+        Jekyll.logger.abort_with "Error:", "You're using the 'maruku' " +
+          "Markdown processor, which has been removed as of 3.0.0. " +
+          "We recommend you switch to Kramdown. To do this, replace " +
+          "`markdown: maruku` with `markdown: kramdown` in your " +
+          "`_config.yml` file."
       end
 
-      if config.key?('paginate') && config['paginate'] && !(config['gems'] || []).include?('jekyll-paginate')
-        Jekyll::Deprecator.deprecation_message "You appear to have pagination " +
-          "turned on, but you haven't included the `jekyll-paginate` gem. " +
-          "Ensure you have `gems: [jekyll-paginate]` in your configuration file."
-      end
       config
     end
 

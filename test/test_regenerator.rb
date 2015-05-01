@@ -36,12 +36,48 @@ class TestRegenerator < JekyllUnitTest
       @regenerator.regenerate?(@document)
       @regenerator.regenerate?(@asset_file)
 
+      # we need to create the destinations for these files,
+      # because regenerate? checks if the destination exists
+      [@page, @post, @document, @asset_file].each do |item|
+        if item.respond_to?(:destination) 
+          dest = item.destination(@site.dest)
+          FileUtils.mkdir_p(File.dirname(dest))
+          FileUtils.touch(dest)
+        end
+      end
       @regenerator.write_metadata
       @regenerator = Regenerator.new(@site)
 
+      # these should pass, since nothing has changed, and the
+      # loop above made sure the desinations exist
       assert !@regenerator.regenerate?(@page)
       assert !@regenerator.regenerate?(@post)
       assert !@regenerator.regenerate?(@document)
+    end
+
+    should "regenerate if destination missing" do
+      # Process files
+      @regenerator.regenerate?(@page)
+      @regenerator.regenerate?(@post)
+      @regenerator.regenerate?(@document)
+      @regenerator.regenerate?(@asset_file)
+
+      @regenerator.write_metadata
+      @regenerator = Regenerator.new(@site)
+
+      # make sure the files don't actually exist
+      [@page, @post, @document, @asset_file].each do |item|
+        if item.respond_to?(:destination) 
+          dest = item.destination(@site.dest)
+          File.unlink(dest) unless !File.exist?(dest)
+        end
+      end
+
+      # while nothing has changed, the output files were not
+      # generated, so they still need to be regenerated
+      assert @regenerator.regenerate?(@page)
+      assert @regenerator.regenerate?(@post)
+      assert @regenerator.regenerate?(@document)
     end
 
     should "always regenerate asset files" do
@@ -73,6 +109,15 @@ class TestRegenerator < JekyllUnitTest
 
     should "cache processed entries" do
       assert @regenerator.cache[@path]
+    end
+
+    should "clear the cache on clear_cache" do
+      # @path will be in the cache because the
+      # site will have processed it
+      assert @regenerator.cache[@path]
+
+      @regenerator.clear_cache
+      assert_equal  @regenerator.cache, {}
     end
 
     should "write to the metadata file" do
@@ -177,6 +222,20 @@ class TestRegenerator < JekyllUnitTest
       assert_equal ["new.dependency"], @regenerator.metadata[@path]["deps"]
       assert @regenerator.modified?("new.dependency")
       assert @regenerator.modified?(@path)
+    end
+
+    should "not regenerate again if multiple dependencies" do
+      multi_deps = @regenerator.metadata.select {|k,v| v['deps'].length > 2}
+      multi_dep_path = multi_deps.keys.first
+
+      assert @regenerator.metadata[multi_dep_path]["deps"].length > 2
+
+      assert @regenerator.modified?(multi_dep_path)
+
+      @site.process
+      @regenerator.clear_cache
+
+      refute @regenerator.modified?(multi_dep_path)
     end
 
     should "regenerate everything if metadata is disabled" do

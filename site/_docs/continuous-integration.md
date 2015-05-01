@@ -72,10 +72,21 @@ with Ruby and requires RubyGems to install, we use the Ruby language build
 environment. Below is a sample `.travis.yml` file, followed by
 an explanation of each line.
 
+**Note:** You will need a Gemfile as well, [Travis will automatically install](http://docs.travis-ci.com/user/languages/ruby/#Dependency-Management) the dependencies based on the referenced gems:
+
+{% highlight ruby %}
+source "https://rubygems.org"
+
+gem "jekyll"
+gem "html-proofer"
+{% endhighlight %}
+
+
 {% highlight yaml %}
 language: ruby
 rvm:
 - 2.1
+# Assume bundler is being used, install step will run `bundle install`.
 script: ./script/cibuild
 
 # branch whitelist
@@ -118,6 +129,7 @@ customizable. If your script won't change much, you can write your test
 incantation here directly:
 
 {% highlight yaml %}
+install: gem install jekyll html-proofer
 script: jekyll build && htmlproof ./_site
 {% endhighlight %}
 
@@ -154,13 +166,12 @@ which it must compile each time it is installed. Luckily, you can
 dramatically decrease the install time of Nokogiri by setting the
 environment variable `NOKOGIRI_USE_SYSTEM_LIBRARIES` to `true`.
 
-## 4. Gotchas
-
-### Exclude `vendor`
-
-Travis bundles all gems in the `vendor` directory on its build servers,
-which Jekyll will mistakenly read and explode on. To avoid this, exclude
-`vendor` in your `_config.yml`:
+<div class="note warning">
+  <h5>Be sure to exclude <code>vendor</code> from your
+   <code>_config.yml</code></h5>
+  <p>Travis bundles all gems in the <code>vendor</code> directory on its build
+   servers, which Jekyll will mistakenly read and explode on.</p>
+</div>
 
 {% highlight yaml %}
 exclude: [vendor]

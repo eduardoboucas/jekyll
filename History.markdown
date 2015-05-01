@@ -12,6 +12,9 @@
   * Mimic GitHub Pages `.html` extension stripping behavior in WEBrick (#3452)
   * Always include file extension on output files (#3490)
   * Improved permalinks for pages and collections (#3538)
+  * Sunset (i.e. remove) Maruku (#3655)
+  * Remove support for relative permalinks (#3679)
+  * Iterate over `site.collections` as an array instead of a hash. (#3670)
 
 ### Minor Enhancements
 
@@ -50,9 +53,24 @@
   * Added build --destination and --source flags (#3418)
   * Site template: remove unused `page.meta` attribute (#3537)
   * Improve the error message when sorting null objects (#3520)
+  * Add jekyll-smartify plugin (#3572)
+  * Added liquid-md5 plugin (#3598)
+  * Documentation: RR replaced with RSpec Mocks (#3600)
+  * Documentation: Fix subpath. (#3599)
+  * Create 'tmp' dir for test_tags if it doesn't exist (#3609)
+  * Extract reading of data from `Site` to reduce responsibilities. (#3545)
+  * Removed the word 'Jekyll' a few times from the comments (#3617)
+  * `bin/jekyll`: with no args, exit with exit code 1 (#3619)
+  * Incremental build if destination file missing (#3614)
+  * Static files `mtime` liquid should return a `Time` obj (#3596)
+  * Use `Jekyll::Post`s for both LSI indexing and lookup. (#3629)
+  * Add `charset=utf-8` for HTML and XML pages in WEBrick (#3649)
+  * Set log level to debug when verbose flag is set (#3665)
+  * Added a mention on the Gemfile to complete the instructions (#3671)
 
 ### Bug Fixes
 
+  * Perform jekyll-paginate deprecation warning correctly. (#3580)
   * Make permalink parsing consistent with pages (#3014)
   * `time()`pre-filter method should accept a `Date` object (#3299)
   * Remove unneeded end tag for `link` in site template (#3236)
@@ -73,9 +91,18 @@
   * Ignore `.jekyll-metadata` in site template (#3496)
   * Template: Point documentation link to the documentation pages (#3502)
   * Removed the trailing slash from the example `/blog` baseurl comment (#3485)
+  * Clear the regenerator cache every time we process (#3592)
+  * Readd (bring back) minitest-profile (#3628)
+  * Add WOFF2 font MIME type to Jekyll server MIME types (#3647)
+  * Be smarter about extracting the extname in `StaticFile` (#3632)
+  * Process metadata for all dependencies (#3608)
+  * Show error message if the YAML front matter on a page/post is invalid. (#3643)
+  * Upgrade redcarpet to 3.2 (Security fix: OSVDB-120415) (#3652)
+  * Create #mock_expects that goes directly to RSpec Mocks. (#3658)
 
 ### Development Fixes
 
+  * Remove loader.rb and "modernize" `script/test`. (#3574)
   * Improve the grammar in the documentation (#3233)
   * Update the LICENSE text to match the MIT license exactly (#3253)
   * Update rake task `site:publish` to fix minor bugs. (#3254)
@@ -97,11 +124,19 @@
   * Minor changes to resolve deprecation warnings (#3547)
   * Convert remaining textile test documents to markdown (#3528)
   * Migrate the tests to use rspec-mocks (#3552)
+  * Remove `activesupport` (#3612)
+  * Added tests for `Jekyll:StaticFile` (#3633)
+  * Force minitest version to 5.5.1 (#3657)
+  * Update the way cucumber accesses Minitest assertions (#3678)
 
 ### Site Enhancements
 
+  * Add 'info' labels to certain notes in collections docs (#3601)
+  * Remove extra spaces, make the last sentence less awkward in permalink docs (#3603)
+  * Update the permalinks documentation to reflect the updates for 3.0 (#3556)
   * Add blog post announcing Jekyll Help (#3523)
   * Add Jekyll Talk to Help page on site (#3518)
+  * Change Ajax pagination resource link to use HTTPS (#3570)
   * Fixing the default host on docs (#3229)
   * Add `jekyll-thumbnail-filter` to list of third-party plugins (#2790)
   * Add link to 'Adding Ajax pagination to Jekyll' to Resources page (#3186)
@@ -140,6 +175,18 @@
   * Improve consistency and clarity of plugins options note (#3546)
   * Add permalink warning to pagination docs (#3551)
   * Fix grammar in Collections docs API stability warning (#3560)
+  * Restructure `excerpt_separator` documentation for clarity (#3550)
+  * Fix accidental line break in collections docs (#3585)
+  * Add information about the `.jekyll-metadata` file (#3597)
+  * Document addition of variable parameters to an include (#3581)
+  * Add `jekyll-files` to the list of third-party plugins. (#3586)
+  * Define the `install` step in the CI example `.travis.yml` (#3622)
+  * Expand collections documentation. (#3638)
+  * Add the "warning" note label to excluding `vendor` in the CI docs page (#3623)
+  * Upgrade pieces of the Ugrading guide for Jekyll 3 (#3607)
+  * Showing how to access specific data items (#3468)
+  * Clarify pagination works from within HTML files (#3467)
+  * Add note to `excerpt_separator` documentation that it can be set globally (#3667)
 
 ## 2.5.3 / 2014-12-22
 

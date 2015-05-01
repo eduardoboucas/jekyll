@@ -9,14 +9,14 @@ following in mind:
 * If you're creating a small fix or patch to an existing feature, just a simple
   test will do. Please stay in the confines of the current test suite and use
   [Shoulda](https://github.com/thoughtbot/shoulda/tree/master) and
-  [RR](https://github.com/rr/rr).
+  [RSpec-Mocks](https://github.com/rspec/rspec-mocks).
 * If it's a brand new feature, make sure to create a new
   [Cucumber](https://github.com/cucumber/cucumber/) feature and reuse steps
   where appropriate. Also, whipping up some documentation in your fork's `site`
   would be appreciated, and once merged it will be transferred over to the main
   `site`, jekyllrb.com.
 * If your contribution changes any Jekyll behavior, make sure to update the
-  documentation. It lives in `site/docs`. If the docs are missing information,
+  documentation. It lives in `site/_docs`. If the docs are missing information,
   please feel free to add it in. Great docs make a great project!
 * Please follow the [GitHub Ruby Styleguide](https://github.com/styleguide/ruby)
   when modifying Ruby code.
